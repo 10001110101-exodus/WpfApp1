@@ -21,7 +21,8 @@ namespace WpfApp1
         public int HitBoxTop { get; set; }
         public int HitBoxWidth {  get; set; }
         public int HitBoxHeight { get; set; }
-        public UIElement UiElement { get; set; }
+        public System.Windows.Shapes.Rectangle UiElement { get; set; }
+        public Rect hitbox { get; set; }
         public void Update();
         public void Talk();
     }
@@ -47,30 +48,33 @@ namespace WpfApp1
 
         private int locationx = 0;
         private int locationy = 0;
+        private Rect _hitbox;
 
-        public int LocationX { get { return locationx; } set{ locationx = value; } }
-        public int LocationY { get { return locationy; } set {  locationy = value; } }
-        public UIElement UiElement { get; set; }
+        public int LocationX { get { return locationx; } set{ locationx = value; _hitbox.X = locationx + HitBoxLeft; } }
+        public int LocationY { get { return locationy; } set {  locationy = value; _hitbox.Y = locationy + HitBoxTop; } }
+        public System.Windows.Shapes.Rectangle UiElement { get; set; }
         private ImageBrush img = new ImageBrush();
         public int HitBoxLeft { get; set; }
         public int HitBoxTop { get; set; }
         public int HitBoxWidth { get; set; }
         public int HitBoxHeight { get; set; }
+        public Rect hitbox { get { return _hitbox; } set { this._hitbox = value; } }
         public Birb(string spriteSheetSource, int numFrames)
         {
             _spriteSheetSource = spriteSheetSource;
 
-            this.HitBoxLeft = 4 * 6;
-            this.HitBoxWidth = 4 * 22;
-            this.HitBoxTop = 4 * 9;
-            this.HitBoxHeight = 4 * 14;
+            this.HitBoxLeft = 4 * -4;
+            this.HitBoxWidth = 4 * 64;
+            this.HitBoxTop = 4 * 5;
+            this.HitBoxHeight = 4 * 58;
+            this.hitbox = new Rect(HitBoxLeft, HitBoxTop, HitBoxWidth, HitBoxHeight);
 
-            this.walkIdx = new cellCount(6);
+            this.walkIdx = new cellCount(8);
             this.cawIdx = new cellCount(8);
             this.UiElement = new System.Windows.Shapes.Rectangle
             {
-                Height = 128,
-                Width = 128,
+                Height = 256,
+                Width = 256,
                 Fill = img,
             };
         }
@@ -86,7 +90,7 @@ namespace WpfApp1
         public void Update()
         {
             cellCount cells;
-            string filePrefix = "\\sprite";
+            string filePrefix = "\\cloakedBird";
             if (caw)
             {
                 filePrefix += "Caw";
@@ -98,8 +102,8 @@ namespace WpfApp1
                 if (walking) filePrefix += "Walk";
             }
             if (facingright) filePrefix += "Right";
-            
-                 
+
+
             BitmapImage cell = new BitmapImage(new Uri(_spriteSheetSource + filePrefix + "_" + cells.index.ToString() + ".png"));
             cells.Increment();
             img.ImageSource = cell;
@@ -116,33 +120,40 @@ namespace WpfApp1
 
         private bool talk = false;
 
-        private int locationx = 448;
-        private int locationy = 64;
+        private int locationx = 0;
+        private int locationy = 0;
 
         private ImageBrush img = new ImageBrush();
-        private ImageBrush talkimg = new ImageBrush();
+        public ImageBrush talkimg = new ImageBrush();
 
         cellCount bob;
         cellCount talkCells;
 
-        public int LocationX { get { return locationx; } set { locationx = value; } }
-        public int LocationY { get { return locationy; } set { locationy = value; } }
+        private Rect _hitbox;
+        public int LocationX { get { return locationx; } set { locationx = value; _hitbox.X = locationx + HitBoxLeft; } }
+        public int LocationY { get { return locationy; } set { locationy = value; _hitbox.Y = locationy + HitBoxTop; } }
         public int HitBoxLeft { get; set; }
         public int HitBoxTop { get; set; }
         public int HitBoxWidth { get; set; }
         public int HitBoxHeight { get; set; }
-        public UIElement UiElement { get; set; }
-        public UIElement UiTalk { get; set; }
+        public System.Windows.Shapes.Rectangle UiElement { get; set; }
+        public System.Windows.Shapes.Rectangle UiTalk { get; set; }
+        public Rect hitbox { get { return _hitbox; } set { _hitbox = value; } }
 
+        private string filePrefix;
         public bool Talk_Bool { get { return talk; } set { talk = value; } }
-        public Worm(string spriteSheetsource)
+        public Worm(string spriteSheetsource, string filePrefix)
         {
             this.HitBoxLeft = 4 * 3;
             this.HitBoxWidth = 4 * 27;
-            this.HitBoxTop = 4 * 4;
-            this.HitBoxHeight = 4 * 22;
+            this.HitBoxTop = 4 * 2;
+            this.HitBoxHeight = 4 * 25;
+
+            this.hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight);
 
             this._spriteSheetSource = spriteSheetsource;
+            this.filePrefix = filePrefix;
+
             this.bob = new cellCount(8);
             this.talkCells = new cellCount(2, 4);
             this.Update();
@@ -164,7 +175,7 @@ namespace WpfApp1
 
         public void Update()
         {
-            string filePrefix = "\\spriteWorm";
+            //string filePrefix = "\\spriteWorm";
             cellCount cells;
             if (talk)
             {

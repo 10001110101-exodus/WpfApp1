@@ -1,4 +1,5 @@
-﻿using System.Security.Policy;
+﻿using System.Diagnostics.Eventing.Reader;
+using System.Security.Policy;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,56 +19,103 @@ namespace WpfApp1
     /// </summary>
     public partial class MainWindow : Window
     {
-        private const int squareSize = 128;
+        #region DEFS
+        private const int squareSize = 256;
         private System.Windows.Threading.DispatcherTimer _frameTimer;
 
         private Birb birb;
         private Worm worm;
+        private Worm freakWorm;
 
         private int cawCounter = 0;
-        private int stepSize = 8;
+        private int stepSize = 12;
 
         private bool left;
         private bool right;
         private bool up;
         private bool down;
 
+        private InventorySlot[] InventorySlots;
+
         private Random rnd = new Random();
         private Point[] points;
 
         private List<ISpriteSheet> sprites = new List<ISpriteSheet>();
 
+        private Interaction wormInteraction1;
+        private Interaction wormInteraction2;
+        private Interaction freakWormInteraction;
+        private Interaction freakWormInteraction1;
+        private Interaction freakWormInteraction2;
+
+        private Interaction curInteraction;
+
+        private DIALOGUE_STATES dialogueState = DIALOGUE_STATES.OUT_DIALOGUE;
+
+        private enum DIALOGUE_STATES
+        {
+            OUT_DIALOGUE,
+            BUFFER,
+            IN_DIALOGUE
+        }
+
+        #endregion
+
+        #region INIT
         public MainWindow()
         {
-            birb = new Birb("C:\\Users\\pcardwell\\source\\repos\\WpfApp1\\WpfApp1\\sprites", 6);
-            worm = new Worm("C:\\Users\\pcardwell\\source\\repos\\WpfApp1\\WpfApp1\\sprites");
+            birb = new Birb("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\sprites", 6);
+            worm = new Worm("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\sprites", "\\spriteWorm");
+            freakWorm = new Worm("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\sprites", "\\freakWorm");
+
             sprites.Add(worm);
             sprites.Add(birb);
+            sprites.Add(freakWorm);
+
+            worm.LocationX = 448;
+            worm.LocationY = 64;
+
+            freakWorm.LocationY = 300;
+            freakWorm.LocationX = 10;
+
             _frameTimer = new System.Windows.Threading.DispatcherTimer();
             _frameTimer.Tick += onFrame;
             _frameTimer.Interval = TimeSpan.FromMilliseconds(75);
 
             InitializeComponent();
-            //birb.UiElement = new Rectangle
-            //{
-                //Height = squareSize,
-                //Width = squareSize,
-                //Fill = playerImage,
-                //StrokeThickness = 2
-            //};
-            //worm.UiElement = new Rectangle
-            //{
-                //Height = squareSize,
-                //Width = squareSize,
-                //Fill = wormImage,
-                //StrokeThickness = 2
-            //};
+
+            InventorySlots = new InventorySlot[] { new InventorySlot(Slot0), new InventorySlot(Slot1), new InventorySlot(Slot2) };
+
+            InitializeInteraction();
+            //drawArea();
+
             _frameTimer.Start();
         }
+        private void InitializeInteraction()
+        {
+            ItemRecieve itemrec = new ItemRecieve(new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\meat.png")), ITEMS.MEAT);
+            wormInteraction1 = new Interaction(new List<IAction>() { new DialogueLine("???", "erm", "wormDialogue_"),
+                                                                          new DialogueLine("???", "would you like this meat?", "wormDialogue_"), itemrec,
+                                                                          new DialogueLine("???", "Watch out for my freaky cousin over there,", "wormDialogue_"),
+                                                                          new DialogueLine("???", "He really likes meat...", "wormDialogue_")}, Dialogue, dialogueText, dialogueName, 
+                                                                          DialoguePortrait, ItemAquired, InventorySlots);
 
+            wormInteraction2 = new Interaction(new List<IAction>() { new DialogueLine("???", "Watch out for my freaky cousin over there,", "wormDialogue_"),
+                                                                          new DialogueLine("???", "He really likes meat...", "wormDialogue_")}, Dialogue, dialogueText, dialogueName,
+                                                                          DialoguePortrait, ItemAquired, InventorySlots);
+
+            freakWormInteraction = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "HI DO YOU HAVE MEAT", "freakWormDialogue_"),
+                                                                          new DialogueLine("Freak Worm", "PLEASE OH PLEASE OH PLEASE", "wormDialogue_")}, Dialogue, dialogueText, dialogueName,
+                                                                          DialoguePortrait, ItemAquired, InventorySlots);
+
+            freakWormInteraction1 = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "YES YES THANK YOU YES", "freakWormDialogue_") }, Dialogue, dialogueText, dialogueName,
+                                                                          DialoguePortrait, ItemAquired, InventorySlots);
+
+            freakWormInteraction2 = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "I LOVE MEAT!!", "freakWormDialogue_") }, Dialogue, dialogueText, dialogueName,
+                                                              DialoguePortrait, ItemAquired, InventorySlots);
+        }
         private void Window_ContentRendered(object sender, EventArgs e)
         {
-
             foreach (var sprite in sprites)
             {
                 GameArea.Children.Add(sprite.UiElement);
@@ -79,56 +127,35 @@ namespace WpfApp1
         }
 
         private void drawArea()
-        {
-            ImageBrush backgroundTile = new ImageBrush();
-
-            for (int i = 0; i < this.Width / squareSize; i++)
-            {
-                for (int j = 0; j < this.Height / squareSize; j++)
-                {
-
-                    //int temp = (j + i) % 2;
-                    backgroundTile.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\WpfApp1\\WpfApp1\\backgroundTile" + 0.ToString() + ".png"));
-
-                    Rectangle rect = new Rectangle
-                    {
-                        Height = squareSize,
-                        Width = squareSize,
-                        Fill = backgroundTile,
-                        StrokeThickness = 2
-                    };
-                    GameArea.Children.Add(rect);
-                    Canvas.SetTop(rect, squareSize * i);
-                    Canvas.SetLeft(rect, j * squareSize);
-                }
-
-            }
-            ImageBrush rockBrush = new ImageBrush();
-            rockBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\WpfApp1\\WpfApp1\\rock.png"));
+{ 
+            ImageBrush meatBrush = new ImageBrush();
+            meatBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\meat.png"));
             points = new Point[5];
-
             for (int i = 0; i < points.Length; i++)
             {
-                int rockX = rnd.Next(0, (int)this.Width);
-                int rockY = rnd.Next(0, (int)this.Height);
-                points[i] = new Point(rockX, rockY);
+                int meatX = rnd.Next(0, (int)this.GameArea.Width) % 160 * 4;
+                int meatY = rnd.Next(0, (int)this.GameArea.Height) % 64 * 4;
+                points[i] = new Point(meatX, meatY);
 
-                Rectangle rect = new Rectangle
+                Rectangle meat = new Rectangle
                 {
-                    Height = squareSize,
-                    Width = squareSize,
-                    Fill = rockBrush,
+                    Height = 128,
+                    Width = 128,
+                    Fill = meatBrush,
                     StrokeThickness = 2
                 };
-                GameArea.Children.Add(rect);
-                Canvas.SetTop(rect, rockY);
-                Canvas.SetLeft(rect, rockX);
-            }
-        }
+                GameArea.Children.Add(meat);
+                Canvas.SetTop(meat, meatY);
+                Canvas.SetLeft(meat, meatX);
 
+            }
+}
+        #endregion
+
+        #region GRAPHICS
         private void drawCharacter()
         {
-            if (birb.Walking)
+            if (birb.Walking && !birb.Caw)
             {
                 if (up)
                 {
@@ -138,12 +165,12 @@ namespace WpfApp1
                 {
                     birb.LocationY += stepSize;
                 }
-                if(right)
+                if (right)
                 {
                     birb.facingRight = true;
                     birb.LocationX += stepSize;
                 }
-                else if(left)
+                else if (left)
                 {
                     birb.facingRight = false;
                     birb.LocationX -= stepSize;
@@ -162,80 +189,71 @@ namespace WpfApp1
 
         private void onFrame(object send, EventArgs e)
         {
-            foreach(var sprite in sprites)
+            foreach (var sprite in sprites)
             {
                 sprite.Update();
             }
             drawCharacter();
         }
+        #endregion
 
-        private void showWorm()
-        {
-            worm.Talk_Bool = true;
-            UIElement rect = new Rectangle
-            {
-                Height = 256,
-                Width = 640,
-                Fill = new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 113, 150, 157))
-            };
-            GameArea.Children.Add(rect);
-            GameArea.Children.Add(worm.UiTalk);
-            Canvas.SetLeft(worm.UiTalk, 128);
-            //GameArea.Children.Add(worm.UiElement);
-            //Canvas.SetTop(worm.UiElement, 128);
-            //Canvas.SetLeft(worm.UiElement, 512);
-        }  
-        private void hideWorm()
-        {
-            GameArea.Children.Remove(worm.UiTalk);
-            //worm.Talk_Bool = false;
-            //GameArea.Children.Clear();
-
-            //GameArea.Children.Add(birb.UiElement);
-
-            //GameArea.Children.Add(worm.UiElement);
-
-            //birb.Update();
-            //worm.Update();
-            //Canvas.SetTop(worm.UiElement, 64);
-            //Canvas.SetLeft(worm.UiElement, 448);
-            //drawCharacter();
-        }
+        #region CHECKING FUNCTIONS 
         private bool checkHitBox(ISpriteSheet sprite)
         {
-            int hitboxleft = sprite.LocationX + sprite.HitBoxLeft;
-            int hitboxright = hitboxleft + sprite.HitBoxWidth;
-            int hitboxtop = sprite.LocationY + sprite.HitBoxTop;
-            int hitboxbottom = hitboxtop + sprite.HitBoxHeight;
-
-            int birbboxleft = birb.LocationX + birb.HitBoxLeft;
-            int birbboxright = birbboxleft + birb.HitBoxWidth;
-            int birbboxtop = birb.LocationY + birb.HitBoxTop;
-            int birbboxbottom = birbboxtop + birb.HitBoxHeight;
-
-            return (birbboxright > hitboxleft
-                && birbboxleft < hitboxright
-                && birbboxtop < hitboxbottom
-                && birbboxbottom > hitboxtop);
+            return sprite.hitbox.IntersectsWith(birb.hitbox);
         }
+        private bool checkHitBoxClick(Point click, ISpriteSheet sprite)
+        {
+            return sprite.hitbox.Contains(click); 
+        }
+        #endregion 
+
+        #region INPUT EVENTS
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if(e.Key == Key.Space)
+            if (e.Key == Key.Space)
             {
                 cawCounter = 8;
                 birb.Caw = true;
-                if (worm.Talk_Bool)
+                ItemAquired.Visibility = Visibility.Hidden;
+                if (curInteraction != null)
                 {
-                    hideWorm();
+                    curInteraction.next();
+                    if (curInteraction.Done)
+                        curInteraction = null;
                 }
                 else if (checkHitBox(worm))
                 {
-                    showWorm();
+                    if (!wormInteraction1.Done)
+                    {
+                        curInteraction = wormInteraction1;
+                        wormInteraction1.next();
+                    }
+                    else
+                    {
+                        curInteraction = wormInteraction2;
+                        wormInteraction2.next();
+                    }
+                }
+                else if (checkHitBox(freakWorm))
+                {
+                    if (!freakWormInteraction1.Done)
+                    {
+                        curInteraction = freakWormInteraction;
+                        freakWormInteraction.next();
+
+                    }
+                    else
+                    {
+                        curInteraction = freakWormInteraction2;
+                        freakWormInteraction2.next();
+                    }
                 }
             }
 
-            else if(!e.IsRepeat)
+
+            else if (!e.IsRepeat && curInteraction == null)
             {
                 birb.Walking = true;
                 switch (e.Key)
@@ -279,12 +297,83 @@ namespace WpfApp1
                         down = false;
                         break;
                 }
-                if(!(left ||  up || down || right))
+                if (!(left || up || down || right))
                 {
                     birb.Walking = false;
                 }
             }
         }
 
+        private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Point p = e.GetPosition(this);
+            double x = p.X;
+            double y = p.Y;
+            
+            if(checkHitBoxClick(p, freakWorm))
+            {
+                foreach(InventorySlot slot in InventorySlots)
+                {
+                    if(slot.Selected = true && slot.Item == ITEMS.MEAT)
+                    {
+                        slot.Empty();
+                        curInteraction = freakWormInteraction1;
+                        curInteraction.next();
+                    }
+                }
+            }
+            else
+            {
+                foreach (InventorySlot slot in InventorySlots)
+                {
+                    if (slot.Selected == true)
+                    {
+                        slot.Selected = false; 
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region INVENTORY SLOTS
+        private void Slot0_Click(object sender, RoutedEventArgs e)
+        {
+            if (InventorySlots[0].Selected)
+            {
+                InventorySlots[0].Selected = false;
+            }
+            else
+            {
+                InventorySlots[0].Selected = true;
+            }
+        }
+        private void Slot1_Click(object sender, RoutedEventArgs e)
+        {
+            if (InventorySlots[1].Selected)
+            {
+                InventorySlots[1].Selected = false;
+            }
+            else
+            {
+                InventorySlots[1].Selected = true;
+            }
+        }
+
+        private void Slot2_Click(object sender, RoutedEventArgs e)
+        {
+            if (InventorySlots[2].Selected)
+            {
+                InventorySlots[2].Selected = false;
+            }
+            else
+            {
+
+                InventorySlots[2].Selected = true;
+            }
+        }
+
+        #endregion
+
     }
+
 }
