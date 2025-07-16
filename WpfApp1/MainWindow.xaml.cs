@@ -21,7 +21,7 @@ namespace WpfApp1
     {
         #region DEFS
         private const int squareSize = 256;
-        private System.Windows.Threading.DispatcherTimer _frameTimer;
+        public System.Windows.Threading.DispatcherTimer _frameTimer;
 
         private Birb birb;
         private Worm worm;
@@ -49,15 +49,6 @@ namespace WpfApp1
         private Interaction freakWormInteraction2;
 
         private Interaction curInteraction;
-
-        private DIALOGUE_STATES dialogueState = DIALOGUE_STATES.OUT_DIALOGUE;
-
-        private enum DIALOGUE_STATES
-        {
-            OUT_DIALOGUE,
-            BUFFER,
-            IN_DIALOGUE
-        }
 
         #endregion
 
@@ -94,25 +85,29 @@ namespace WpfApp1
         private void InitializeInteraction()
         {
             ItemRecieve itemrec = new ItemRecieve(new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\meat.png")), ITEMS.MEAT);
+            SpriteMove freakMove = new SpriteMove(freakWorm, new int[] { 896 }, new DIR[] { DIR.RIGHT }, 12);
+
             wormInteraction1 = new Interaction(new List<IAction>() { new DialogueLine("???", "erm", "wormDialogue_"),
                                                                           new DialogueLine("???", "would you like this meat?", "wormDialogue_"), itemrec,
                                                                           new DialogueLine("???", "Watch out for my freaky cousin over there,", "wormDialogue_"),
                                                                           new DialogueLine("???", "He really likes meat...", "wormDialogue_")}, Dialogue, dialogueText, dialogueName, 
-                                                                          DialoguePortrait, ItemAquired, InventorySlots);
+                                                                          DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
 
             wormInteraction2 = new Interaction(new List<IAction>() { new DialogueLine("???", "Watch out for my freaky cousin over there,", "wormDialogue_"),
                                                                           new DialogueLine("???", "He really likes meat...", "wormDialogue_")}, Dialogue, dialogueText, dialogueName,
-                                                                          DialoguePortrait, ItemAquired, InventorySlots);
+                                                                          DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
 
             freakWormInteraction = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "HI DO YOU HAVE MEAT", "freakWormDialogue_"),
                                                                           new DialogueLine("Freak Worm", "PLEASE OH PLEASE OH PLEASE", "wormDialogue_")}, Dialogue, dialogueText, dialogueName,
-                                                                          DialoguePortrait, ItemAquired, InventorySlots);
+                                                                          DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
 
-            freakWormInteraction1 = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "YES YES THANK YOU YES", "freakWormDialogue_") }, Dialogue, dialogueText, dialogueName,
-                                                                          DialoguePortrait, ItemAquired, InventorySlots);
+            freakWormInteraction1 = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "YES YES THANK YOU YES", "freakWormDialogue_"), 
+                                                                          new DialogueLine("???", "...", "wormDialogue_"),
+                                                                          freakMove }, Dialogue, dialogueText, dialogueName,
+                                                                          DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
 
             freakWormInteraction2 = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "I LOVE MEAT!!", "freakWormDialogue_") }, Dialogue, dialogueText, dialogueName,
-                                                              DialoguePortrait, ItemAquired, InventorySlots);
+                                                              DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
         }
         private void Window_ContentRendered(object sender, EventArgs e)
         {
@@ -185,6 +180,9 @@ namespace WpfApp1
                 cawCounter--;
             }
             else birb.Caw = false;
+
+            Canvas.SetTop(freakWorm.UiElement, freakWorm.LocationY);
+            Canvas.SetLeft(freakWorm.UiElement, freakWorm.LocationX);
         }
 
         private void onFrame(object send, EventArgs e)
@@ -242,7 +240,6 @@ namespace WpfApp1
                     {
                         curInteraction = freakWormInteraction;
                         freakWormInteraction.next();
-
                     }
                     else
                     {

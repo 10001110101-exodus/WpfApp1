@@ -13,7 +13,7 @@ using System.Data;
 
 namespace WpfApp1
 {
-    interface ISpriteSheet
+    public interface ISpriteSheet
     {
         public int LocationX { get; set; }
         public int LocationY { get; set; }

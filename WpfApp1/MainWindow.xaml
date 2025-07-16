@@ -34,7 +34,7 @@
             <ImageBrush RenderOptions.CachingHint="Cache" ImageSource="/backgroundTile0.png" TileMode="Tile" Stretch="UniformToFill" ViewportUnits="Absolute" ViewboxUnits="RelativeToBoundingBox" Viewport="0,0,128,128"/>
         </Canvas.Background>-->
         <Canvas.Background>
-            <SolidColorBrush Color="#FF71969D"/>
+            <SolidColorBrush Color="#FF4C6367"/>
         </Canvas.Background>
 
         <Rectangle x:Name="BackgroundArea" Height="512" Width="896" HorizontalAlignment="Center" VerticalAlignment="Top">
