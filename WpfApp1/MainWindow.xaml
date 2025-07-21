@@ -9,7 +9,6 @@
     Title="MainWindow"  ContentRendered="Window_ContentRendered" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp" SizeToContent="WidthAndHeight" Background="Black">
     <Window.Resources>
         <Style x:Key="buttonStyle"  TargetType="Button">
-            <Setter Property="Background" Value="LightBlue" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -28,6 +27,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
     </Window.Resources>
     <Canvas Name="GameArea" Height="768" Width="896" CacheMode="BitmapCache" MouseDown="Canvas_MouseDown">
         <!--<Canvas.Background>
@@ -39,7 +39,9 @@
 
         <Rectangle x:Name="BackgroundArea" Height="512" Width="896" HorizontalAlignment="Center" VerticalAlignment="Top">
             <Rectangle.Fill>
-                <ImageBrush RenderOptions.CachingHint="Cache" ImageSource="/backgroundTile0.png" TileMode="Tile" Stretch="UniformToFill" ViewportUnits="Absolute" ViewboxUnits="RelativeToBoundingBox" Viewport="0,0,128,128"/>
+                <ImageBrush ImageSource="/background0.png" x:Name="backgroundBrush"></ImageBrush>
+
+                <!--<ImageBrush RenderOptions.CachingHint="Cache" ImageSource="/backgroundTile0.png" TileMode="Tile" Stretch="UniformToFill" ViewportUnits="Absolute" ViewboxUnits="RelativeToBoundingBox" Viewport="0,0,128,128"/>-->
             </Rectangle.Fill>
         </Rectangle>
 
@@ -59,8 +61,6 @@
             </Rectangle.Fill>
         </Rectangle>
 
-
-
         <Grid x:Name="Dialogue" Height="256" Width="512" Canvas.Left="389" Canvas.Top="512" Visibility="Hidden">
             <Grid.Background>
                 <ImageBrush ImageSource="/Resources/dialogueBoxUI.png"/>
@@ -71,7 +71,7 @@
             <Rectangle x:Name="DialoguePortrait" Height="128" Width="128" Margin="384,128,0,0"/>
         </Grid>
 
-        <TextBlock x:Name="ItemAquired" FontSize="36" Text="Item Aquired!!" FontFamily="/Resources/Fonts/PixelifySans-Regular.ttf#Pixelify Sans Bold" Canvas.Left="203" Canvas.Top="298" IsEnabled="False" Visibility="Hidden"  />
+        <TextBlock x:Name="ItemAquired" FontSize="36" Text="Item Aquired!!" FontFamily="/Resources/Fonts/PixelifySans-Regular.ttf#Pixelify Sans Bold" Canvas.Left="322" Canvas.Top="283" IsEnabled="False" />
 
         <Button Name="Slot0" Width="128" Height="128" HorizontalAlignment="Center" Canvas.Top="640" VerticalAlignment="Top" Background="#00DDDDDD" Style="{StaticResource buttonStyle}" Click="Slot0_Click" Focusable="False" />
         <Button Name="Slot1" Width="128" Height="128" HorizontalAlignment="Center" Canvas.Top="640" VerticalAlignment="Top" Canvas.Left="128" Background="#00DDDDDD" Style="{StaticResource buttonStyle}" Click="Slot1_Click" Focusable="False"/>

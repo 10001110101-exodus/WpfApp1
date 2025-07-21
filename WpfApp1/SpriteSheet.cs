@@ -19,12 +19,15 @@ namespace WpfApp1
         public int LocationY { get; set; }
         public int HitBoxLeft { get; set; }
         public int HitBoxTop { get; set; }
-        public int HitBoxWidth {  get; set; }
+        public int HitBoxWidth { get; set; }
         public int HitBoxHeight { get; set; }
         public System.Windows.Shapes.Rectangle UiElement { get; set; }
         public Rect hitbox { get; set; }
         public void Update();
         public void Talk();
+        public bool IsOnScreen { get; set; }
+
+        public Rect BottomHitBox { get; }
     }
 
     abstract class spriteSheet
@@ -49,9 +52,13 @@ namespace WpfApp1
         private int locationx = 0;
         private int locationy = 0;
         private Rect _hitbox;
+        private bool _isOnScreen = false;
 
-        public int LocationX { get { return locationx; } set{ locationx = value; _hitbox.X = locationx + HitBoxLeft; } }
-        public int LocationY { get { return locationy; } set {  locationy = value; _hitbox.Y = locationy + HitBoxTop; } }
+        public int LocationX { get { return locationx; } set{ locationx = value; _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight); } }
+
+        public int LocationY { get { return locationy; } set { locationy = value;
+                _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight); } }
+
         public System.Windows.Shapes.Rectangle UiElement { get; set; }
         private ImageBrush img = new ImageBrush();
         public int HitBoxLeft { get; set; }
@@ -59,6 +66,19 @@ namespace WpfApp1
         public int HitBoxWidth { get; set; }
         public int HitBoxHeight { get; set; }
         public Rect hitbox { get { return _hitbox; } set { this._hitbox = value; } }
+        public bool IsOnScreen { get { return _isOnScreen; } set { _isOnScreen = value; } }
+
+        private int _bottomLeft = 0 * 4;
+        private int _bottomTop = 55 * 4;
+        private int _bottomWidth = 64 * 4;
+        private int _bottomHeight = 9 * 4;
+        public Rect BottomHitBox
+        {
+            get
+            {
+                return new Rect(_bottomLeft + locationx, _bottomTop + locationy, _bottomWidth, _bottomHeight);
+            }
+        }
         public Birb(string spriteSheetSource, int numFrames)
         {
             _spriteSheetSource = spriteSheetSource;
@@ -67,7 +87,7 @@ namespace WpfApp1
             this.HitBoxWidth = 4 * 64;
             this.HitBoxTop = 4 * 5;
             this.HitBoxHeight = 4 * 58;
-            this.hitbox = new Rect(HitBoxLeft, HitBoxTop, HitBoxWidth, HitBoxHeight);
+            this._hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight);
 
             this.walkIdx = new cellCount(8);
             this.cawIdx = new cellCount(8);
@@ -122,6 +142,7 @@ namespace WpfApp1
 
         private int locationx = 0;
         private int locationy = 0;
+        private bool _isOnScreen = false;
 
         private ImageBrush img = new ImageBrush();
         public ImageBrush talkimg = new ImageBrush();
@@ -130,8 +151,23 @@ namespace WpfApp1
         cellCount talkCells;
 
         private Rect _hitbox;
-        public int LocationX { get { return locationx; } set { locationx = value; _hitbox.X = locationx + HitBoxLeft; } }
-        public int LocationY { get { return locationy; } set { locationy = value; _hitbox.Y = locationy + HitBoxTop; } }
+        public int LocationX 
+        {
+            get { return locationx; } 
+            set 
+            { 
+                locationx = value; 
+                _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight);
+            }
+        }
+        public int LocationY { 
+            get { return locationy; } 
+            set 
+            {
+                locationy = value; 
+                _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight); 
+            } 
+        }
         public int HitBoxLeft { get; set; }
         public int HitBoxTop { get; set; }
         public int HitBoxWidth { get; set; }
@@ -139,6 +175,20 @@ namespace WpfApp1
         public System.Windows.Shapes.Rectangle UiElement { get; set; }
         public System.Windows.Shapes.Rectangle UiTalk { get; set; }
         public Rect hitbox { get { return _hitbox; } set { _hitbox = value; } }
+        public bool IsOnScreen { get { return _isOnScreen; } set { _isOnScreen = value; } }
+
+        public Rect BottomHitBox
+        {
+            get
+            {
+                return new Rect(_bottomLeft + locationx, _bottomTop + locationy, _bottomWidth, _bottomHeight);
+            }
+        }
+
+        private int _bottomLeft = 0 * 4;
+        private int _bottomTop = 0 * 4;
+        private int _bottomWidth = 32 * 4;
+        private int _bottomHeight = 14 * 4;
 
         private string filePrefix;
         public bool Talk_Bool { get { return talk; } set { talk = value; } }
@@ -149,7 +199,7 @@ namespace WpfApp1
             this.HitBoxTop = 4 * 2;
             this.HitBoxHeight = 4 * 25;
 
-            this.hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight);
+            this._hitbox = new Rect(HitBoxLeft + LocationX, HitBoxTop + LocationY, HitBoxWidth, HitBoxHeight);
 
             this._spriteSheetSource = spriteSheetsource;
             this.filePrefix = filePrefix;

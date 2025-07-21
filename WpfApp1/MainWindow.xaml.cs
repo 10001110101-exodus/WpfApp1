@@ -42,14 +42,30 @@ namespace WpfApp1
 
         private List<ISpriteSheet> sprites = new List<ISpriteSheet>();
 
+        private System.Windows.Shapes.Rectangle eyeballStatue;
+        private ImageBrush eyeballBrush;
+
         private Interaction wormInteraction1;
         private Interaction wormInteraction2;
         private Interaction freakWormInteraction;
         private Interaction freakWormInteraction1;
         private Interaction freakWormInteraction2;
+        private Interaction wormInteraction3;
+        private Interaction statueInteraction;
 
         private Interaction curInteraction;
 
+        private Rect eyeballStatueHitbox = new Rect((74 + 13) * 4, (14 + 16) * 4, 36 * 4, 25 * 4);
+        private bool behindFreak = false;
+        private bool behindWorm = false;
+        private bool behindStatue = false;
+
+        private LOCATION location = LOCATION.AREA1;
+        private enum LOCATION
+        {
+            AREA1,
+            AREA2
+        }
         #endregion
 
         #region INIT
@@ -59,9 +75,18 @@ namespace WpfApp1
             worm = new Worm("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\sprites", "\\spriteWorm");
             freakWorm = new Worm("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\sprites", "\\freakWorm");
 
+            eyeballBrush = new ImageBrush(new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue0.png")));
+            eyeballStatue = new Rectangle
+            {
+                Width = 64 * 4,
+                Height = 64 * 4,
+                Fill = eyeballBrush
+            };
+
             sprites.Add(worm);
-            sprites.Add(birb);
             sprites.Add(freakWorm);
+            sprites.Add(birb);
+
 
             worm.LocationX = 448;
             worm.LocationY = 64;
@@ -76,10 +101,10 @@ namespace WpfApp1
             InitializeComponent();
 
             InventorySlots = new InventorySlot[] { new InventorySlot(Slot0), new InventorySlot(Slot1), new InventorySlot(Slot2) };
+            ItemAquired.Visibility = Visibility.Hidden;
 
             InitializeInteraction();
             //drawArea();
-
             _frameTimer.Start();
         }
         private void InitializeInteraction()
@@ -98,7 +123,7 @@ namespace WpfApp1
                                                                           DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
 
             freakWormInteraction = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "HI DO YOU HAVE MEAT", "freakWormDialogue_"),
-                                                                          new DialogueLine("Freak Worm", "PLEASE OH PLEASE OH PLEASE", "wormDialogue_")}, Dialogue, dialogueText, dialogueName,
+                                                                          new DialogueLine("Freak Worm", "PLEASE OH PLEASE OH PLEASE", "freakWormDialogue_")}, Dialogue, dialogueText, dialogueName,
                                                                           DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
 
             freakWormInteraction1 = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "YES YES THANK YOU YES", "freakWormDialogue_"), 
@@ -106,8 +131,18 @@ namespace WpfApp1
                                                                           freakMove }, Dialogue, dialogueText, dialogueName,
                                                                           DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
 
-            freakWormInteraction2 = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "I LOVE MEAT!!", "freakWormDialogue_") }, Dialogue, dialogueText, dialogueName,
+            freakWormInteraction2 = new Interaction(new List<IAction>() { new DialogueLine("Freak Worm", "BRING ME MORE\n F L E S H\nFOR MY EFFIGY", "freakWormDialogue_") }, Dialogue, dialogueText, dialogueName,
                                                               DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
+
+            wormInteraction3 = new Interaction(new List<IAction>() { new DialogueLine("???", "Oh god...", "wormDialogue_"),
+                                                                     new DialogueLine("???", "What have you done?", "wormDialogue_")}, Dialogue, dialogueText, dialogueName,
+                                                                     DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
+
+            statueInteraction = new Interaction(new List<IAction>() { new DialogueLine("Birb", "Hm, what a strange statue...", "birbDialogue_"),
+                                                                      new DialogueLine("Birb", "Oh well, surely this won't become plot relevant later.", "birbDialogue_"),
+                                                                     }, Dialogue, dialogueText, dialogueName,
+                                                                     DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
+
         }
         private void Window_ContentRendered(object sender, EventArgs e)
         {
@@ -117,6 +152,7 @@ namespace WpfApp1
                 sprite.Update();
                 Canvas.SetTop(sprite.UiElement, sprite.LocationY);
                 Canvas.SetLeft(sprite.UiElement, sprite.LocationX);
+                sprite.IsOnScreen = true;
             }
             drawCharacter();
         }
@@ -172,6 +208,19 @@ namespace WpfApp1
                 }
             }
 
+            if (birb.LocationX + 256 < 0 && location == LOCATION.AREA2)
+            {
+                renderArea1();
+                return;
+            }
+            else if (birb.LocationX > GameArea.Width && location == LOCATION.AREA1)
+            {
+                renderArea2();
+                return;
+            }
+
+            checkBehind();
+
             Canvas.SetTop(birb.UiElement, birb.LocationY);
             Canvas.SetLeft(birb.UiElement, birb.LocationX);
 
@@ -183,6 +232,149 @@ namespace WpfApp1
 
             Canvas.SetTop(freakWorm.UiElement, freakWorm.LocationY);
             Canvas.SetLeft(freakWorm.UiElement, freakWorm.LocationX);
+
+            void checkBehind()
+            {
+                if (checkHitBoxBottom(worm.BottomHitBox))
+                {
+                    if (!behindWorm)
+                    {
+                        GameArea.Children.Remove(worm.UiElement);
+                        GameArea.Children.Add(worm.UiElement);
+                    }
+                    behindWorm = true;
+                }
+                else
+                {
+                    if (behindWorm)
+                    {
+                        GameArea.Children.Remove(birb.UiElement);
+                        GameArea.Children.Add(birb.UiElement);
+                    }
+                    behindWorm = false;
+                }
+
+                if (checkHitBoxBottom(freakWorm.BottomHitBox))
+                {
+                    if (!behindFreak)
+                    {
+                        GameArea.Children.Remove(freakWorm.UiElement);
+                        GameArea.Children.Add(freakWorm.UiElement);
+                    }
+                    behindFreak = true;
+                }
+                else
+                {
+                    if (behindFreak)
+                    {
+                        GameArea.Children.Remove(birb.UiElement);
+                        GameArea.Children.Add(birb.UiElement);
+                    }
+                    behindFreak = false;
+                }
+
+                if (location == LOCATION.AREA2)
+                {
+
+                    if (checkHitBoxBottom(eyeballStatueHitbox))
+                    {
+                        if (!behindStatue)
+                        {
+                            GameArea.Children.Remove(eyeballStatue);
+                            GameArea.Children.Add(eyeballStatue);
+                        }
+                        behindStatue = true;
+                    }
+                    else
+                    {
+                        if(behindStatue)
+                        {
+                            GameArea.Children.Remove(birb.UiElement);
+                            GameArea.Children.Add(birb.UiElement);
+                        }
+                        behindStatue = false;
+                    }
+                }
+            }
+        }
+
+        private void renderArea1()
+        {
+            clearSprites();
+
+            GameArea.Children.Remove(eyeballStatue);
+
+            location = LOCATION.AREA1;
+
+            backgroundBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\background0.png"));
+
+            birb.LocationX = (int)GameArea.Width - (128 / 2);
+            GameArea.Children.Add(birb.UiElement);
+            birb.IsOnScreen = true;
+
+            GameArea.Children.Add(worm.UiElement);
+            worm.IsOnScreen = true;
+
+            if(!freakWormInteraction1.Done)
+            {
+                GameArea.Children.Add(freakWorm.UiElement);
+                freakWorm.IsOnScreen = true;
+            }
+
+            setSpriteLocations();
+        }
+
+        private void renderArea2()
+        {
+            clearSprites();
+
+            location = LOCATION.AREA2;
+
+            string eyeballImage = freakWormInteraction1.Done ? "C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue1.png" : "C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue0.png";
+            backgroundBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\background1.png"));
+            eyeballBrush.ImageSource = new BitmapImage(new Uri(eyeballImage));
+
+            GameArea.Children.Add(eyeballStatue);
+            Canvas.SetLeft(eyeballStatue, 74 * 4);
+            Canvas.SetTop(eyeballStatue, 16 * 4);
+
+            birb.LocationX = -(128 / 2);
+            GameArea.Children.Add(birb.UiElement);
+            birb.IsOnScreen = true;
+
+            if (freakWormInteraction1.Done)
+            {
+                GameArea.Children.Add(freakWorm.UiElement);
+                freakWorm.LocationY = 192;
+                freakWorm.LocationX = 500;
+                freakWorm.IsOnScreen = true;
+            }
+
+            setSpriteLocations();
+        }
+
+        private void setSpriteLocations()
+        {
+            foreach (var sprite in sprites)
+            {
+                if (GameArea.Children.Contains(sprite.UiElement))
+                {
+                    Canvas.SetTop(sprite.UiElement, sprite.LocationY);
+                    Canvas.SetLeft(sprite.UiElement, sprite.LocationX);
+                }
+            }
+        }
+
+        private void clearSprites()
+        {
+            foreach (var sprite in sprites)
+            {
+                if(GameArea.Children.Contains(sprite.UiElement))
+                {
+                    GameArea.Children.Remove(sprite.UiElement);
+                    sprite.IsOnScreen = false;
+                }
+            }
         }
 
         private void onFrame(object send, EventArgs e)
@@ -204,6 +396,18 @@ namespace WpfApp1
         {
             return sprite.hitbox.Contains(click); 
         }
+        private bool checkHitBox(Rect obj)
+        {
+            return birb.hitbox.IntersectsWith(obj);
+        }
+        private bool checkHitBoxBottom(ISpriteSheet sprite)
+        {
+            return birb.BottomHitBox.IntersectsWith(sprite.BottomHitBox);
+        }
+        private bool checkHitBoxBottom(Rect hitbox)
+        {
+            return birb.BottomHitBox.IntersectsWith(hitbox);
+        }
         #endregion 
 
         #region INPUT EVENTS
@@ -221,30 +425,43 @@ namespace WpfApp1
                     if (curInteraction.Done)
                         curInteraction = null;
                 }
-                else if (checkHitBox(worm))
+                else
                 {
-                    if (!wormInteraction1.Done)
+                    if (worm.IsOnScreen && checkHitBox(worm))
                     {
-                        curInteraction = wormInteraction1;
-                        wormInteraction1.next();
+                        if (!wormInteraction1.Done)
+                        {
+                            curInteraction = wormInteraction1;
+                            wormInteraction1.next();
+                        }
+                        else if (!freakWormInteraction1.Done)
+                        {
+                            curInteraction = wormInteraction2;
+                            wormInteraction2.next();
+                        }
+                        else
+                        {
+                            curInteraction = wormInteraction3;
+                            wormInteraction3.next();
+                        }
                     }
-                    else
+                    else if (freakWorm.IsOnScreen && checkHitBox(freakWorm))
                     {
-                        curInteraction = wormInteraction2;
-                        wormInteraction2.next();
+                        if (!freakWormInteraction1.Done)
+                        {
+                            curInteraction = freakWormInteraction;
+                            freakWormInteraction.next();
+                        }
+                        else
+                        {
+                            curInteraction = freakWormInteraction2;
+                            freakWormInteraction2.next();
+                        }
                     }
-                }
-                else if (checkHitBox(freakWorm))
-                {
-                    if (!freakWormInteraction1.Done)
+                    else if(location == LOCATION.AREA2 && checkHitBox(eyeballStatueHitbox))
                     {
-                        curInteraction = freakWormInteraction;
-                        freakWormInteraction.next();
-                    }
-                    else
-                    {
-                        curInteraction = freakWormInteraction2;
-                        freakWormInteraction2.next();
+                        curInteraction = statueInteraction;
+                        statueInteraction.next();
                     }
                 }
             }
@@ -364,7 +581,6 @@ namespace WpfApp1
             }
             else
             {
-
                 InventorySlots[2].Selected = true;
             }
         }

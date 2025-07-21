@@ -31,6 +31,7 @@ namespace WpfApp1
                 }
             }
         }
+
         public ITEMS Item { get; set; }
         public Button Btn { get { return btn; } set { btn = value; } }
 
@@ -47,9 +48,8 @@ namespace WpfApp1
         public void Empty()
         {
             Item = ITEMS.EMPTY;
-            btn.Background = null;
+            btn.Background = new SolidColorBrush();
             Selected = false;
-            btn.BorderThickness = new Thickness(0);
         }
     }
 
