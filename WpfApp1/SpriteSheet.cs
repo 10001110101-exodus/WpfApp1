@@ -54,10 +54,17 @@ namespace WpfApp1
         private Rect _hitbox;
         private bool _isOnScreen = false;
 
-        public int LocationX { get { return locationx; } set{ locationx = value; _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight); } }
+        public int LocationX { get { return locationx; } set { locationx = value; _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight); } }
 
-        public int LocationY { get { return locationy; } set { locationy = value;
-                _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight); } }
+        public int LocationY
+        {
+            get { return locationy; }
+            set
+            {
+                locationy = value;
+                _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight);
+            }
+        }
 
         public System.Windows.Shapes.Rectangle UiElement { get; set; }
         private ImageBrush img = new ImageBrush();
@@ -100,11 +107,12 @@ namespace WpfApp1
         }
 
         public bool Walking { get { return walking; } set { /*if (value == true) walkIdx.index = 0; */walking = value; } }
-        public bool facingRight {
+        public bool facingRight
+        {
             get { return facingright; }
             set { facingright = value; }
         }
-        public bool Caw { get { return caw; } set { if  (value == true)  { cawIdx.index = 0; walking = false; } caw = value; } }
+        public bool Caw { get { return caw; } set { if (value == true) { cawIdx.index = 0; walking = false; } caw = value; } }
 
 
         public void Update()
@@ -151,22 +159,23 @@ namespace WpfApp1
         cellCount talkCells;
 
         private Rect _hitbox;
-        public int LocationX 
+        public int LocationX
         {
-            get { return locationx; } 
-            set 
-            { 
-                locationx = value; 
+            get { return locationx; }
+            set
+            {
+                locationx = value;
                 _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight);
             }
         }
-        public int LocationY { 
-            get { return locationy; } 
-            set 
+        public int LocationY
+        {
+            get { return locationy; }
+            set
             {
-                locationy = value; 
-                _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight); 
-            } 
+                locationy = value;
+                _hitbox = new Rect(HitBoxLeft + locationx, HitBoxTop + locationy, HitBoxWidth, HitBoxHeight);
+            }
         }
         public int HitBoxLeft { get; set; }
         public int HitBoxTop { get; set; }
@@ -213,7 +222,7 @@ namespace WpfApp1
                 Height = 128,
                 Width = 128,
                 Fill = img,
-             };
+            };
 
             this.UiTalk = new System.Windows.Shapes.Rectangle
             {
@@ -240,7 +249,7 @@ namespace WpfApp1
 
         public void Talk()
         {
-            
+
         }
     }
     public class cellCount

@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Drawing;
 
 namespace WpfApp1
 {
@@ -38,12 +39,13 @@ namespace WpfApp1
         private InventorySlot[] InventorySlots;
 
         private Random rnd = new Random();
-        private Point[] points;
+        private System.Windows.Point[] points;
 
         private List<ISpriteSheet> sprites = new List<ISpriteSheet>();
 
         private System.Windows.Shapes.Rectangle eyeballStatue;
         private ImageBrush eyeballBrush;
+        private System.Windows.Controls.Image eyeballImage; 
 
         private Interaction wormInteraction1;
         private Interaction wormInteraction2;
@@ -76,12 +78,17 @@ namespace WpfApp1
             freakWorm = new Worm("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\sprites", "\\freakWorm");
 
             eyeballBrush = new ImageBrush(new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue0.png")));
-            eyeballStatue = new Rectangle
+            eyeballStatue = new System.Windows.Shapes.Rectangle
             {
                 Width = 64 * 4,
                 Height = 64 * 4,
                 Fill = eyeballBrush
             };
+
+            //eyeballImage = new System.Windows.Controls.Image();
+            //eyeballImage.Height = 64 * 4;
+            //eyeballImage.Width = 64 * 4;
+            //eyeballImage.Source = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue0.png"));
 
             sprites.Add(worm);
             sprites.Add(freakWorm);
@@ -114,7 +121,7 @@ namespace WpfApp1
 
             wormInteraction1 = new Interaction(new List<IAction>() { new DialogueLine("???", "erm", "wormDialogue_"),
                                                                           new DialogueLine("???", "would you like this meat?", "wormDialogue_"), itemrec,
-                                                                          new DialogueLine("???", "Watch out for my freaky cousin over there,", "wormDialogue_"),
+                                                                          new DialogueLine("???", "Watch out for my peculiar cousin over there,", "wormDialogue_"),
                                                                           new DialogueLine("???", "He really likes meat...", "wormDialogue_")}, Dialogue, dialogueText, dialogueName, 
                                                                           DialoguePortrait, ItemAquired, InventorySlots, _frameTimer);
 
@@ -161,14 +168,14 @@ namespace WpfApp1
 { 
             ImageBrush meatBrush = new ImageBrush();
             meatBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\meat.png"));
-            points = new Point[5];
+            points = new System.Windows.Point[5];
             for (int i = 0; i < points.Length; i++)
             {
                 int meatX = rnd.Next(0, (int)this.GameArea.Width) % 160 * 4;
                 int meatY = rnd.Next(0, (int)this.GameArea.Height) % 64 * 4;
-                points[i] = new Point(meatX, meatY);
+                points[i] = new System.Windows.Point(meatX, meatY);
 
-                Rectangle meat = new Rectangle
+                System.Windows.Shapes.Rectangle meat = new System.Windows.Shapes.Rectangle
                 {
                     Height = 128,
                     Width = 128,
@@ -330,9 +337,9 @@ namespace WpfApp1
 
             location = LOCATION.AREA2;
 
-            string eyeballImage = freakWormInteraction1.Done ? "C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue1.png" : "C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue0.png";
+            string eyeballImageSrc = freakWormInteraction1.Done ? "C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue1.png" : "C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue0.png";
             backgroundBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\background1.png"));
-            eyeballBrush.ImageSource = new BitmapImage(new Uri(eyeballImage));
+            eyeballBrush.ImageSource = new BitmapImage(new Uri(eyeballImageSrc));
 
             GameArea.Children.Add(eyeballStatue);
             Canvas.SetLeft(eyeballStatue, 74 * 4);
@@ -392,7 +399,7 @@ namespace WpfApp1
         {
             return sprite.hitbox.IntersectsWith(birb.hitbox);
         }
-        private bool checkHitBoxClick(Point click, ISpriteSheet sprite)
+        private bool checkHitBoxClick(System.Windows.Point click, ISpriteSheet sprite)
         {
             return sprite.hitbox.Contains(click); 
         }
@@ -520,7 +527,7 @@ namespace WpfApp1
 
         private void Canvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Point p = e.GetPosition(this);
+            System.Windows.Point p = e.GetPosition(this);
             double x = p.X;
             double y = p.Y;
             
