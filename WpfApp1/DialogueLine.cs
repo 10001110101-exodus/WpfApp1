@@ -1,4 +1,4 @@
-﻿using System.Windows.Media;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -10,6 +10,7 @@ namespace WpfApp1
         private string _text;
         private string _portraitFile;
         private int i = 0;
+        private string appPath = AppDomain.CurrentDomain.BaseDirectory;
 
         private ActionType actionType;
 
@@ -22,7 +23,7 @@ namespace WpfApp1
             this.actionType = ActionType.DIALOGUE;
             this._name = name;
             this._text = text;
-            this._portraitFile = "C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\Resources\\DialoguePhotos\\" + portraitFile;
+            this._portraitFile = appPath + @"\Resources\DialoguePhotos\" + portraitFile;
             this.PortraitBrush.ImageSource = new BitmapImage(new Uri(this._portraitFile + "0" + ".png"));
         }
 
