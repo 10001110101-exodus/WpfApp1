@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.Eventing.Reader;
+using System.Diagnostics.Eventing.Reader;
 using System.Security.Policy;
 using System.Text;
 using System.Windows;
@@ -23,6 +23,7 @@ namespace WpfApp1
         #region DEFS
         private const int squareSize = 256;
         public System.Windows.Threading.DispatcherTimer _frameTimer;
+        string appPath = AppDomain.CurrentDomain.BaseDirectory;
 
         private Birb birb;
         private Worm worm;
@@ -73,11 +74,11 @@ namespace WpfApp1
         #region INIT
         public MainWindow()
         {
-            birb = new Birb("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\sprites", 6);
-            worm = new Worm("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\sprites", "\\spriteWorm");
-            freakWorm = new Worm("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\sprites", "\\freakWorm");
+            birb = new Birb(appPath + @"\sprites", 6);
+            worm = new Worm(appPath + @"\sprites", @"\spriteWorm");
+            freakWorm = new Worm(appPath + @"\sprites", @"\freakWorm");
 
-            eyeballBrush = new ImageBrush(new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue0.png")));
+            eyeballBrush = new ImageBrush(new BitmapImage(new Uri(appPath + @"\eyeballStatue0.png")));
             eyeballStatue = new System.Windows.Shapes.Rectangle
             {
                 Width = 64 * 4,
@@ -116,7 +117,7 @@ namespace WpfApp1
         }
         private void InitializeInteraction()
         {
-            ItemRecieve itemrec = new ItemRecieve(new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\meat.png")), ITEMS.MEAT);
+            ItemRecieve itemrec = new ItemRecieve(new BitmapImage(new Uri(appPath + @"\meat.png")), ITEMS.MEAT);
             SpriteMove freakMove = new SpriteMove(freakWorm, new int[] { 896 }, new DIR[] { DIR.RIGHT }, 12);
 
             wormInteraction1 = new Interaction(new List<IAction>() { new DialogueLine("???", "erm", "wormDialogue_"),
@@ -167,7 +168,7 @@ namespace WpfApp1
         private void drawArea()
 { 
             ImageBrush meatBrush = new ImageBrush();
-            meatBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\meat.png"));
+            meatBrush.ImageSource = new BitmapImage(new Uri(appPath + @"\meat.png"));
             points = new System.Windows.Point[5];
             for (int i = 0; i < points.Length; i++)
             {
@@ -313,7 +314,7 @@ namespace WpfApp1
 
             location = LOCATION.AREA1;
 
-            backgroundBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\background0.png"));
+            backgroundBrush.ImageSource = new BitmapImage(new Uri(appPath + @"\background0.png"));
 
             birb.LocationX = (int)GameArea.Width - (128 / 2);
             GameArea.Children.Add(birb.UiElement);
@@ -337,8 +338,8 @@ namespace WpfApp1
 
             location = LOCATION.AREA2;
 
-            string eyeballImageSrc = freakWormInteraction1.Done ? "C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue1.png" : "C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\eyeballStatue0.png";
-            backgroundBrush.ImageSource = new BitmapImage(new Uri("C:\\Users\\pcardwell\\source\\repos\\bird time\\WpfApp1\\background1.png"));
+            string eyeballImageSrc = freakWormInteraction1.Done ? (appPath + @"\eyeballStatue1.png") : (appPath + @"\eyeballStatue0.png");
+            backgroundBrush.ImageSource = new BitmapImage(new Uri(appPath + @"\background1.png"));
             eyeballBrush.ImageSource = new BitmapImage(new Uri(eyeballImageSrc));
 
             GameArea.Children.Add(eyeballStatue);
